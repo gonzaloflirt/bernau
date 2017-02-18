@@ -1,6 +1,7 @@
 import 'source-map-support/register'; // enable sourcemaps in node
 import * as soundworks from 'soundworks/server';
 import PlayerExperience from './PlayerExperience';
+import ControllerExperience from './ControllerExperience';
 import defaultConfig from './config/default';
 
 let config = null;
@@ -27,5 +28,7 @@ soundworks.server.setClientConfigDefinition((clientType, config, httpRequest) =>
 });
 
 const player = new PlayerExperience('player');
+
+const controller = new ControllerExperience('controller');
 
 soundworks.server.start();
