@@ -1,14 +1,13 @@
 import * as soundworks from 'soundworks/client';
+import audioFileNames from '../shared/audioFileNames';
+
 const View = soundworks.View;
 
 const viewTemplate = `
   <canvas class="background"></canvas>
   <div class="background fit-container"></div>
-  <div class="foreground fit-container">
-    <div class="section-center flex-center">
-      <button class="btn" id="saw">saw</button>
-      <button class="btn" id="sine">sine</button>
-    </div>
+  <div class="foreground fit-container" id="foreground">
+    <ol id="list"></ol>
   </div>
 `;
 
@@ -32,13 +31,17 @@ export default class ControllerExperience extends soundworks.Experience {
 
     this.show();
 
-    document.getElementById("saw").addEventListener("click", function(){
-      this.send('play', 0);
-    }.bind(this))
-
-
-    document.getElementById("sine").addEventListener("click", function(){
-      this.send('play', 1);
+    audioFileNames.forEach(function(name, index) {
+      var btn = document.createElement('btn')
+      btn.appendChild(document.createTextNode(name))
+      btn.style.width = '200px'
+      btn.style.padding = '20px 20px 20px 20px'
+      btn.style.display='inline-block'
+      btn.style.fontSize = 'large'
+      btn.addEventListener("click", function(){
+        this.send('play', index)
+      }.bind(this))
+      document.getElementById('list').append(btn)
     }.bind(this))
   }
 
