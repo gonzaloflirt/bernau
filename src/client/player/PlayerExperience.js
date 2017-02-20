@@ -22,6 +22,7 @@ export default class PlayerExperience extends soundworks.Experience {
       assetsDomain: assetsDomain,
       files: audioFiles,
     });
+    this.sync = this.require('sync');
   }
 
   init() {
@@ -40,11 +41,11 @@ export default class PlayerExperience extends soundworks.Experience {
 
     this.show();
 
-    this.receive('play', (index) => {
+    this.receive('play', (index, time) => {
       const src = audioContext.createBufferSource();
       src.buffer = this.loader.buffers[index];
       src.connect(audioContext.destination);
-      src.start(audioContext.currentTime);
+      src.start(this.sync.getAudioTime(time));
     });
 
     this.renderer = new soundworks.Renderer(100, 100);

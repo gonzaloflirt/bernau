@@ -7,6 +7,7 @@ export default class ControllerExperience extends Experience {
 
     this.checkin = this.require('checkin');
     this.sharedConfig = this.require('shared-config');
+    this.sync = this.require('sync');
   }
 
   start() {
@@ -16,7 +17,8 @@ export default class ControllerExperience extends Experience {
   enter(client) {
     super.enter(client);
     this.receive(client, 'play', (index) => {
-      this.broadcast(null, null, 'play', index);
+      var syncTime = this.sync.getSyncTime() + 2;
+      this.broadcast(null, null, 'play', index, syncTime);
     });
   }
 
