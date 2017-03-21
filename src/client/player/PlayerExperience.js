@@ -7,9 +7,13 @@ const viewTemplate = `
   <div class="foreground">
     <div class="section-top flex-middle"></div>
     <div class="section-center flex-center"></div>
-    <div class="section-bottom flex-middle"></div>
+    <div class="section-bottom flex-middle">
+      <p class="small" id="channel">left</p>
+    </div>
   </div>
 `;
+
+var channelIndex = 0;
 
 export default class PlayerExperience extends soundworks.Experience {
 
@@ -31,6 +35,14 @@ export default class PlayerExperience extends soundworks.Experience {
     this.viewCtor = soundworks.CanvasView;
     this.viewOptions = { preservePixelRatio: true };
     this.view = this.createView();
+
+    document.documentElement.addEventListener("touchend", function(){
+      this.iterateChannelIndex();
+    }.bind(this))
+
+    document.documentElement.addEventListener("click", function(){
+      this.iterateChannelIndex();
+    }.bind(this))
   }
 
   start() {
@@ -42,8 +54,20 @@ export default class PlayerExperience extends soundworks.Experience {
     this.show();
 
     this.receive('play', (index, time) => {
+
+      var fileBuffer = this.loader.buffers[index];
+      var samples = fileBuffer.getChannelData(channelIndex % fileBuffer.numberOfChannels);
+
+      var buffer =
+        audioContext.createBuffer(1, fileBuffer.length, audioContext.sampleRate);
+
+      var channel = buffer.getChannelData(0);
+      for (var j = 0; j < fileBuffer.length; j++) {
+        channel[j] = samples[j];
+      }
+
       const src = audioContext.createBufferSource();
-      src.buffer = this.loader.buffers[index];
+      src.buffer = buffer;
       src.connect(audioContext.destination);
       src.start(this.sync.getAudioTime(time));
     });
@@ -60,6 +84,11 @@ export default class PlayerExperience extends soundworks.Experience {
       ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
       ctx.restore();
     });
+  }
+
+  iterateChannelIndex() {
+    channelIndex = (channelIndex + 1) % 2;
+    document.getElementById("channel").innerHTML = channelIndex == 0 ? "left" : "right";
   }
 
 }
