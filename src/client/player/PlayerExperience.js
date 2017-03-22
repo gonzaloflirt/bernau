@@ -14,6 +14,7 @@ const viewTemplate = `
 `;
 
 var channelIndex = 0;
+var bufferSources = [];
 
 export default class PlayerExperience extends soundworks.Experience {
 
@@ -54,7 +55,12 @@ export default class PlayerExperience extends soundworks.Experience {
     this.show();
 
     this.receive('play', (index, time) => {
+      this.stop();
       this.play(index, time);
+    });
+
+    this.receive('stop', (index, time) => {
+      this.stop();
     });
 
     this.renderer = new soundworks.Renderer(100, 100);
@@ -83,10 +89,19 @@ export default class PlayerExperience extends soundworks.Experience {
       channel[j] = samples[j];
     }
 
-    const src = audioContext.createBufferSource();
-    src.buffer = buffer;
-    src.connect(audioContext.destination);
-    src.start(this.sync.getAudioTime(time));
+    bufferSources[index] = audioContext.createBufferSource();
+    bufferSources[index].buffer = buffer;
+    bufferSources[index].connect(audioContext.destination);
+    bufferSources[index].start(this.sync.getAudioTime(time));
+  }
+
+  stop() {
+    for (var i in bufferSources) {
+      try {
+        bufferSources[i].stop();
+      }
+      catch(err) {}
+    }
   }
 
   iterateChannelIndex() {

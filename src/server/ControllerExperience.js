@@ -15,6 +15,10 @@ export default class ControllerExperience extends Experience {
     this.osc.receive('/play', (index) => {
       this.broadcastPlay(index)
     });
+
+    this.osc.receive('/stop', () => {
+      this.broadcastStop()
+    });
   }
 
   enter(client) {
@@ -22,6 +26,10 @@ export default class ControllerExperience extends Experience {
 
     this.receive(client, 'play', (index) => {
       this.broadcastPlay(index)
+    });
+
+    this.receive(client, 'stop', () => {
+      this.broadcastStop()
     });
   }
 
@@ -33,5 +41,9 @@ export default class ControllerExperience extends Experience {
   broadcastPlay(index) {
     var syncTime = this.sync.getSyncTime() + 2;
     this.broadcast(null, null, 'play', index, syncTime);
+  }
+
+  broadcastStop() {
+    this.broadcast(null, null, 'stop');
   }
 }
