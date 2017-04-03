@@ -126,8 +126,10 @@ export default class PlayerExperience extends soundworks.Experience {
   }
 
   iterateChannelIndex() {
+    this.stop();
     channelIndex = (channelIndex + 1) % 2;
-    document.getElementById("channel").innerHTML = channelIndex == 0 ? "left" : "right";
+    document.getElementById('channel').innerHTML = channelIndex == 0 ? 'left' : 'right';
+    this.sceneChanged(this.params.params['scene'].value);
   }
 
 }
