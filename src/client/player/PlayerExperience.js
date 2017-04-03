@@ -28,6 +28,7 @@ export default class PlayerExperience extends soundworks.Experience {
       files: audioFiles,
     });
     this.sync = this.require('sync');
+    this.params = this.require('shared-params');
   }
 
   init() {
@@ -54,14 +55,8 @@ export default class PlayerExperience extends soundworks.Experience {
 
     this.show();
 
-    this.receive('play', (index, time) => {
-      this.stop();
-      this.play(index, time);
-    });
-
-    this.receive('stop', (index, time) => {
-      this.stop();
-    });
+    this.params.addParamListener('playing', (value) => this.playingChanged(value));
+    this.params.addParamListener('scene', (value) => this.sceneChanged(value));
 
     this.renderer = new soundworks.Renderer(100, 100);
     this.view.addRenderer(this.renderer);
@@ -77,8 +72,34 @@ export default class PlayerExperience extends soundworks.Experience {
     });
   }
 
-  play(index, time) {
+  playingChanged(value) {
+    if (!value) {
+      this.stop();
+    }
+  }
+
+  sceneChanged(value) {
+    var items = value.split(' ');
+    this.startScene(Number(items[0]), Number(items[1]));
+  }
+
+  startScene(index, time) {
     var fileBuffer = this.loader.buffers[index];
+
+    var currentTime = this.sync.getSyncTime() + 0.1;
+
+    var startTime = time;
+    var position = 0;
+
+    if (currentTime > time) {
+      startTime = currentTime;
+      position = startTime - time;
+    }
+
+    if (position > fileBuffer.duration) {
+      return;
+    }
+
     var samples = fileBuffer.getChannelData(channelIndex % fileBuffer.numberOfChannels);
 
     var buffer =
@@ -92,7 +113,7 @@ export default class PlayerExperience extends soundworks.Experience {
     bufferSources[index] = audioContext.createBufferSource();
     bufferSources[index].buffer = buffer;
     bufferSources[index].connect(audioContext.destination);
-    bufferSources[index].start(this.sync.getAudioTime(time));
+    bufferSources[index].start(this.sync.getAudioTime(startTime), position);
   }
 
   stop() {

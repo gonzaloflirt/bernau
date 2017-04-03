@@ -7,6 +7,7 @@ export default class PlayerExperience extends Experience {
     this.checkin = this.require('checkin');
     this.sharedConfig = this.require('shared-config');
     this.sync = this.require('sync');
+    this.params = this.require('shared-params');
   }
 
   start() {}

@@ -1,6 +1,7 @@
-import { Experience } from 'soundworks/server';
+import * as soundworks from 'soundworks/server';
+import audioFileNames from '../client/shared/audioFileNames';
 
-export default class ControllerExperience extends Experience {
+export default class ControllerExperience extends soundworks.BasicSharedController {
 
   constructor(clientType) {
     super(clientType);
@@ -9,28 +10,25 @@ export default class ControllerExperience extends Experience {
     this.sharedConfig = this.require('shared-config');
     this.sync = this.require('sync');
     this.osc = this.require('osc');
+    this.params = this.require('shared-params');
   }
 
   start() {
     this.osc.receive('/play', (index) => {
-      this.broadcastPlay(index)
+      this.startScene(index);
     });
 
     this.osc.receive('/stop', () => {
-      this.broadcastStop()
+      this.setPlaying(false);
     });
+
+    for(const i in audioFileNames) {
+      this.params.addParamListener(audioFileNames[i], () => this.startScene(i));
+    }
   }
 
   enter(client) {
     super.enter(client);
-
-    this.receive(client, 'play', (index) => {
-      this.broadcastPlay(index)
-    });
-
-    this.receive(client, 'stop', () => {
-      this.broadcastStop()
-    });
   }
 
   exit(client) {
@@ -38,12 +36,13 @@ export default class ControllerExperience extends Experience {
     // ...
   }
 
-  broadcastPlay(index) {
-    var syncTime = this.sync.getSyncTime() + 2;
-    this.broadcast(null, null, 'play', index, syncTime);
+  setPlaying(value) {
+    this.params.params['playing'].update(value);
   }
 
-  broadcastStop() {
-    this.broadcast(null, null, 'stop');
+  startScene(index) {
+    var syncTime = this.sync.getSyncTime() + 1;
+    this.params.params['scene'].update(index.toString() + ' ' + syncTime.toString());
   }
+
 }
