@@ -1,5 +1,5 @@
 import * as soundworks from 'soundworks/server';
-import audioFileNames from '../client/shared/audioFileNames';
+import score from '../client/shared/score'
 
 export default class ControllerExperience extends soundworks.BasicSharedController {
 
@@ -22,8 +22,9 @@ export default class ControllerExperience extends soundworks.BasicSharedControll
       this.setPlaying(false);
     });
 
-    for(const i in audioFileNames) {
-      this.params.addParamListener(audioFileNames[i], () => this.startScene(i));
+    const names = score.names();
+    for(const i in names) {
+      this.params.addParamListener(names[i], () => this.startScene(i));
     }
   }
 

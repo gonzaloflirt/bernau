@@ -3,7 +3,7 @@ import * as soundworks from 'soundworks/server';
 import PlayerExperience from './PlayerExperience';
 import ControllerExperience from './ControllerExperience';
 import defaultConfig from './config/default';
-import audioFileNames from '../client/shared/audioFileNames';
+import score from '../client/shared/score'
 
 let config = null;
 
@@ -17,8 +17,9 @@ process.env.NODE_ENV = config.env;
 soundworks.server.init(config);
 
 const sharedParams = soundworks.server.require('shared-params');
-for(var i in audioFileNames) {
-  sharedParams.addTrigger(audioFileNames[i], 'trigger ' + audioFileNames[i]);
+const names = score.names();
+for(var i in names) {
+  sharedParams.addTrigger(names[i], 'trigger ' + names[i]);
 }
 sharedParams.addBoolean('playing', 'playing', false);
 sharedParams.addText('scene', 'scene', '0 0');

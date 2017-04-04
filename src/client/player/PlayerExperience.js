@@ -1,4 +1,5 @@
 import * as soundworks from 'soundworks/client';
+import score from '../shared/score';
 
 const audioContext = soundworks.audioContext;
 
@@ -18,14 +19,14 @@ var bufferSources = [];
 
 export default class PlayerExperience extends soundworks.Experience {
 
-  constructor(assetsDomain, audioFiles) {
+  constructor(assetsDomain) {
     super();
 
     this.platform = this.require('platform', { features: ['web-audio', 'wake-lock'] });
     this.checkin = this.require('checkin', { showDialog: false });
     this.loader = this.require('loader', {
       assetsDomain: assetsDomain,
-      files: audioFiles,
+      files: score.files(),
     });
     this.sync = this.require('sync');
     this.params = this.require('shared-params');
@@ -84,7 +85,8 @@ export default class PlayerExperience extends soundworks.Experience {
   }
 
   startScene(index, time) {
-    var fileBuffer = this.loader.buffers[index];
+    var bufferIndex = score.index(index, channelIndex);
+    var buffer = this.loader.buffers[bufferIndex];
 
     var currentTime = this.sync.getSyncTime() + 0.1;
 
@@ -96,18 +98,8 @@ export default class PlayerExperience extends soundworks.Experience {
       position = startTime - time;
     }
 
-    if (position > fileBuffer.duration) {
+    if (position > buffer.duration) {
       return;
-    }
-
-    var samples = fileBuffer.getChannelData(channelIndex % fileBuffer.numberOfChannels);
-
-    var buffer =
-      audioContext.createBuffer(1, fileBuffer.length, audioContext.sampleRate);
-
-    var channel = buffer.getChannelData(0);
-    for (var j = 0; j < fileBuffer.length; j++) {
-      channel[j] = samples[j];
     }
 
     bufferSources[index] = audioContext.createBufferSource();

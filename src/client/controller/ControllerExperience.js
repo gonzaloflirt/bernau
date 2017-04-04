@@ -1,18 +1,18 @@
 import * as soundworks from 'soundworks/client';
+import score from '../shared/score'
 
 var scene = -1;
 
 export default class ControllerExperience extends soundworks.BasicSharedController {
 
-  constructor(files, options) {
+  constructor(options) {
     super(options);
 
-    this.files = files;
     this.params = this.require('shared-params');
     this.scheduler = this.require('scheduler');
     this.sync = this.require('sync');
     this.loader = this.require('loader', {
-      files: files,
+      files: score.files(),
     });
   }
 
@@ -31,10 +31,10 @@ export default class ControllerExperience extends soundworks.BasicSharedControll
   iterateScene() {
     if (this.sharedParams.params['playing'].value)
     {
-      scene = (scene + 1) % this.files.length;
+      scene = (scene + 1) % score.length();
       var syncTime = this.sync.getSyncTime() + 1;
       this.params.params['scene'].update(scene.toString() + ' ' + syncTime.toString());
-      var sceneDuration = this.loader.buffers[scene].duration;
+      var sceneDuration = this.loader.buffers[score.index(scene, 0)].duration;
       this.scheduler.defer(function(){
         this.iterateScene() }.bind(this),
         this.sync.getSyncTime() + sceneDuration);
