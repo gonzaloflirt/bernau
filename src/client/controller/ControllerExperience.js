@@ -27,12 +27,16 @@ export default class ControllerExperience extends soundworks.BasicSharedControll
       scene = -1;
       this.iterateScene();
     }
+    else
+    {
+      this.params.params['scene'].update('false 0 0');
+    }
   }
 
   iterateScene() {
     scene = (scene + 1) % score.length();
     var syncTime = this.sync.getSyncTime() + 1;
-    this.params.params['scene'].update(scene.toString() + ' ' + syncTime.toString());
+    this.params.params['scene'].update('true ' + scene + ' ' + syncTime);
     var sceneDuration = this.loader.buffers[score.index(scene, 0)].duration;
     this.scheduler.defer(function(){
       this.iterateScene() }.bind(this),

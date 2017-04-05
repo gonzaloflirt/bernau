@@ -56,7 +56,6 @@ export default class PlayerExperience extends soundworks.Experience {
 
     this.show();
 
-    this.params.addParamListener('playing', (value) => this.playingChanged(value));
     this.params.addParamListener('scene', (value) => this.sceneChanged(value));
 
     this.renderer = new soundworks.Renderer(100, 100);
@@ -73,15 +72,20 @@ export default class PlayerExperience extends soundworks.Experience {
     });
   }
 
-  playingChanged(value) {
-    if (!value) {
-      this.stop();
-    }
+  decodeScene(value) {
+    var items = value.split(' ');
+    return {playing: items[0] == 'true', index: Number(items[1]), time: Number(items[2])};
   }
 
   sceneChanged(value) {
-    var items = value.split(' ');
-    this.startScene(Number(items[0]), Number(items[1]));
+    var state = this.decodeScene(value);
+    if (state.playing)
+    {
+      this.startScene(state.index, state.time);
+    }
+    else {
+      this.stop()
+    }
   }
 
   startScene(index, time) {

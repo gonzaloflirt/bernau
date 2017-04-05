@@ -22,7 +22,7 @@ for(var i in names) {
   sharedParams.addTrigger(names[i], 'trigger ' + names[i]);
 }
 sharedParams.addBoolean('playing', 'playing', false);
-sharedParams.addText('scene', 'scene', '0 0');
+sharedParams.addText('scene', 'scene', 'false 0 0');
 
 soundworks.server.setClientConfigDefinition((clientType, config, httpRequest) => {
   return {

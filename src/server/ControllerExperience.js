@@ -43,7 +43,8 @@ export default class ControllerExperience extends soundworks.BasicSharedControll
 
   startScene(index) {
     var syncTime = this.sync.getSyncTime() + 1;
-    this.params.params['scene'].update(index.toString() + ' ' + syncTime.toString());
+    var text = 'true ' + index + ' ' + syncTime;
+    this.params.params['scene'].update(text);
   }
 
 }
