@@ -14,11 +14,11 @@ export default class PlayerExperience extends Experience {
 
   enter(client) {
     super.enter(client);
-    // ...
+    this.params.update('numPlayers', this.clients.length);
   }
 
   exit(client) {
     super.exit(client);
-    // ...
+    this.params.update('numPlayers', this.clients.length);
   }
 }
