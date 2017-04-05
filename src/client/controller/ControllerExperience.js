@@ -22,6 +22,7 @@ export default class ControllerExperience extends soundworks.BasicSharedControll
   }
 
   playingChanged(value) {
+    this.scheduler.clear();
     if (value) {
       scene = -1;
       this.iterateScene();
@@ -29,15 +30,12 @@ export default class ControllerExperience extends soundworks.BasicSharedControll
   }
 
   iterateScene() {
-    if (this.sharedParams.params['playing'].value)
-    {
-      scene = (scene + 1) % score.length();
-      var syncTime = this.sync.getSyncTime() + 1;
-      this.params.params['scene'].update(scene.toString() + ' ' + syncTime.toString());
-      var sceneDuration = this.loader.buffers[score.index(scene, 0)].duration;
-      this.scheduler.defer(function(){
-        this.iterateScene() }.bind(this),
-        this.sync.getSyncTime() + sceneDuration);
-    }
+    scene = (scene + 1) % score.length();
+    var syncTime = this.sync.getSyncTime() + 1;
+    this.params.params['scene'].update(scene.toString() + ' ' + syncTime.toString());
+    var sceneDuration = this.loader.buffers[score.index(scene, 0)].duration;
+    this.scheduler.defer(function(){
+      this.iterateScene() }.bind(this),
+      this.sync.getSyncTime() + sceneDuration);
   }
 }
