@@ -17,6 +17,8 @@ soundworks.server.init(config);
 
 const sharedParams = soundworks.server.require('shared-params');
 sharedParams.addBoolean('playing', 'playing', false);
+sharedParams.addTrigger('next', '>>');
+sharedParams.addTrigger('prev', '<<');
 sharedParams.addText('state', 'state', 'false 0 0');
 sharedParams.addText('numPlayers', 'num players', '0');
 

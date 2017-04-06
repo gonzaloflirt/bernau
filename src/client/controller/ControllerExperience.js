@@ -19,6 +19,8 @@ export default class ControllerExperience extends soundworks.BasicSharedControll
     this.firstCallback = true;
     this.stateDurations = util.stateDurations(this.loader.buffers);
     this.params.addParamListener('playing', (value) => this.playingChanged(value));
+    this.params.addParamListener('next', () => this.nextTriggered());
+    this.params.addParamListener('prev', () => this.prevTriggered());
   }
 
   playingChanged(value) {
@@ -41,4 +43,23 @@ export default class ControllerExperience extends soundworks.BasicSharedControll
     this.params.params['state'].update(util.encodeState(value, index, currentTime));
   }
 
+  nextTriggered() {
+    const currentTime = this.sync.getSyncTime() + 1;
+    var state = util.decodeState(this.params.getValue('state'));
+    var current =
+    util.currentIndex(currentTime, state.index, state.time, this.stateDurations);
+    var index = util.increaseStateIndex(current.index);
+    this.params.update('state',
+      util.encodeState(state.playing, index, currentTime));
+  }
+
+  prevTriggered() {
+    const currentTime = this.sync.getSyncTime() + 1;
+    var state = util.decodeState(this.params.getValue('state'));
+    var current =
+    util.currentIndex(currentTime, state.index, state.time, this.stateDurations);
+    var index = util.decreaseStateIndex(current.index);
+    this.params.update('state',
+      util.encodeState(state.playing, index, currentTime));
+  }
 }
