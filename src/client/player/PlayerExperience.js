@@ -1,5 +1,6 @@
 import * as soundworks from 'soundworks/client';
 import score from '../shared/score';
+import util from '../shared/util';
 
 const audioContext = soundworks.audioContext;
 
@@ -30,6 +31,7 @@ export default class PlayerExperience extends soundworks.Experience {
     });
     this.sync = this.require('sync');
     this.params = this.require('shared-params');
+    this.scheduler = this.require('scheduler');
   }
 
   init() {
@@ -38,6 +40,7 @@ export default class PlayerExperience extends soundworks.Experience {
     this.viewCtor = soundworks.CanvasView;
     this.viewOptions = { preservePixelRatio: true };
     this.view = this.createView();
+    this.stateDurations = util.stateDurations(this.loader.buffers);
 
     document.documentElement.addEventListener("touchend", function(){
       this.iterateChannelIndex();
@@ -56,7 +59,7 @@ export default class PlayerExperience extends soundworks.Experience {
 
     this.show();
 
-    this.params.addParamListener('scene', (value) => this.sceneChanged(value));
+    this.params.addParamListener('state', (value) => this.stateChanged(value));
 
     this.renderer = new soundworks.Renderer(100, 100);
     this.view.addRenderer(this.renderer);
@@ -72,27 +75,29 @@ export default class PlayerExperience extends soundworks.Experience {
     });
   }
 
-  decodeScene(value) {
-    var items = value.split(' ');
-    return {playing: items[0] == 'true', index: Number(items[1]), time: Number(items[2])};
+  currentTime() {
+    return this.sync.getSyncTime() + 0.1; // some buffer time...
   }
 
-  sceneChanged(value) {
-    var state = this.decodeScene(value);
+  stateChanged(value) {
+    var state = util.decodeState(value);
+    this.stop();
     if (state.playing)
     {
-      this.startScene(state.index, state.time);
+      this.startPlayback(state.index, state.time);
     }
-    else {
-      this.stop()
-    }
+  }
+
+  startPlayback(index, time) {
+    var current = util.currentIndex(this.currentTime(), index, time, this.stateDurations);
+    this.startScene(current.index, current.time);
   }
 
   startScene(index, time) {
     var bufferIndex = score.index(index, channelIndex);
     var buffer = this.loader.buffers[bufferIndex];
 
-    var currentTime = this.sync.getSyncTime() + 0.1;
+    var currentTime = this.currentTime();
 
     var startTime = time;
     var position = 0;
@@ -110,9 +115,17 @@ export default class PlayerExperience extends soundworks.Experience {
     bufferSources[index].buffer = buffer;
     bufferSources[index].connect(audioContext.destination);
     bufferSources[index].start(this.sync.getAudioTime(startTime), position);
+
+    const nextIndex = util.increaseStateIndex(index);
+    const nextTime = startTime + buffer.duration - position;
+
+    this.scheduler.defer(
+      function() { this.startScene(nextIndex, nextTime) }.bind(this, nextIndex, nextTime),
+      nextTime - 0.2);
   }
 
   stop() {
+    this.scheduler.clear();
     for (var i in bufferSources) {
       try {
         bufferSources[i].stop();
@@ -125,7 +138,7 @@ export default class PlayerExperience extends soundworks.Experience {
     this.stop();
     channelIndex = (channelIndex + 1) % 2;
     document.getElementById('channel').innerHTML = channelIndex == 0 ? 'left' : 'right';
-    this.sceneChanged(this.params.params['scene'].value);
+    this.stateChanged(this.params.getValue('state'));
   }
 
 }
