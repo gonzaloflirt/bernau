@@ -14,7 +14,11 @@ export default class PlayerExperience extends Experience {
 
   enter(client) {
     super.enter(client);
-    this.params.update('numPlayers', this.clients.length);
+
+    const numPlayers = this.clients.length
+    const maxPlayers = Number(this.params.params.maxPlayers.data.value); // getValue()???
+    this.params.update('numPlayers', numPlayers);
+    this.params.update('maxPlayers', Math.max(numPlayers, maxPlayers));
   }
 
   exit(client) {

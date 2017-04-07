@@ -21,6 +21,7 @@ sharedParams.addTrigger('next', '>>');
 sharedParams.addTrigger('prev', '<<');
 sharedParams.addText('state', 'state', 'false 0 0');
 sharedParams.addText('numPlayers', 'num players', '0');
+sharedParams.addText('maxPlayers', 'max num players', '0');
 
 soundworks.server.setClientConfigDefinition((clientType, config, httpRequest) => {
   return {
