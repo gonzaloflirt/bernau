@@ -12,6 +12,7 @@
 
 # Application instance specific
 /logs
+/dist
 /db
 
 # ignore junk files

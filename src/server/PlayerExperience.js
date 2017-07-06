@@ -8,9 +8,11 @@ export default class PlayerExperience extends Experience {
     this.sharedConfig = this.require('shared-config');
     this.sync = this.require('sync');
     this.params = this.require('shared-params');
+    this.scheduler = this.require('sync-scheduler');
+    this.audioBufferManager = this.require('audio-buffer-manager');
   }
 
-  start() {}
+  start() { }
 
   enter(client) {
     super.enter(client);
@@ -23,6 +25,8 @@ export default class PlayerExperience extends Experience {
 
   exit(client) {
     super.exit(client);
+
     this.params.update('numPlayers', this.clients.length);
   }
+
 }

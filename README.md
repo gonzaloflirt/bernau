@@ -6,5 +6,6 @@ Audio file player based on [*Soundworks*](https://github.com/collective-soundwor
 git clone git@github.com:gonzaloflirt/bernau.git
 cd bernau
 npm install
+npm run transpile
 npm run start
 ```

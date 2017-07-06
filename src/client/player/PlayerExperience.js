@@ -15,6 +15,7 @@ const viewTemplate = `
   </div>
 `;
 
+const model = { title: `B E R N A U` };
 var channelIndex = 0;
 var nodes = [];
 
@@ -23,24 +24,35 @@ export default class PlayerExperience extends soundworks.Experience {
   constructor(assetsDomain) {
     super();
 
-    this.platform = this.require('platform', { features: ['web-audio', 'wake-lock'] });
+    this.platform = this.require('platform', { features: ['web-audio'] });
     this.checkin = this.require('checkin', { showDialog: false });
-    this.loader = this.require('loader', {
-      assetsDomain: assetsDomain,
-      files: score.files(),
-    });
+    this.audioBufferManager = this.require('audio-buffer-manager', {
+      assetsDomain: assetsDomain, files: score.files() });
     this.sync = this.require('sync');
     this.params = this.require('shared-params');
-    this.scheduler = this.require('scheduler');
+    this.scheduler = this.require('sync-scheduler');
   }
 
-  init() {
-    this.viewTemplate = viewTemplate;
-    this.viewContent = { title: `B E R N A U` };
-    this.viewCtor = soundworks.CanvasView;
-    this.viewOptions = { preservePixelRatio: true };
-    this.view = this.createView();
-    this.stateDurations = util.stateDurations(this.loader.buffers);
+  start() {
+    super.start();
+
+    this.view = new soundworks.CanvasView(viewTemplate, model, {}, {
+      id: this.id,
+      preservePixelRatio: true,
+    });
+
+    this.show().then(() => {
+      this.view.setPreRender(function(ctx, dt, canvasWidth, canvasHeight) {
+        var grd = ctx.createLinearGradient(0, 0, this.canvasWidth, this.canvasHeight);
+        grd.addColorStop(0, "purple");
+        grd.addColorStop(1, "green");
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
+      });
+    });
+
+    this.stateDurations = util.stateDurations(this.audioBufferManager.data);
+    this.params.addParamListener('state', (value) => this.stateChanged(value));
 
     document.documentElement.addEventListener("touchend", function(){
       this.iterateChannelIndex();
@@ -49,30 +61,9 @@ export default class PlayerExperience extends soundworks.Experience {
     document.documentElement.addEventListener("click", function(){
       this.iterateChannelIndex();
     }.bind(this))
-  }
 
-  start() {
-    super.start();
-
-    if (!this.hasStarted)
-      this.init();
-
-    this.show();
-
-    this.params.addParamListener('state', (value) => this.stateChanged(value));
-
-    this.renderer = new soundworks.Renderer(100, 100);
+    this.renderer = new soundworks.Canvas2dRenderer(100, 100);
     this.view.addRenderer(this.renderer);
-
-    this.view.setPreRender(function(ctx, dt) {
-      ctx.save();
-      var grd = ctx.createLinearGradient(0, 0, this.canvasWidth, this.canvasHeight);
-      grd.addColorStop(0, "purple");
-      grd.addColorStop(1, "green");
-      ctx.fillStyle = grd;
-      ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
-      ctx.restore();
-    });
   }
 
   currentTime() {
@@ -95,7 +86,7 @@ export default class PlayerExperience extends soundworks.Experience {
 
   startScene(index, time) {
     var bufferIndex = score.index(index, channelIndex);
-    var buffer = this.loader.buffers[bufferIndex];
+    var buffer = this.audioBufferManager.data[bufferIndex];
 
     var currentTime = this.currentTime();
 

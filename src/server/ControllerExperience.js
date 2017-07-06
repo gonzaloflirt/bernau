@@ -1,19 +1,18 @@
-import * as soundworks from 'soundworks/server';
-import score from '../client/shared/score'
+import { Experience } from 'soundworks/server';
 
-export default class ControllerExperience extends soundworks.BasicSharedController {
+export default class ControllerExperience extends Experience {
 
   constructor(clientType) {
     super(clientType);
 
     this.checkin = this.require('checkin');
     this.sharedConfig = this.require('shared-config');
+    this.audioBufferManager = this.require('audio-buffer-manager');
     this.sync = this.require('sync');
     this.params = this.require('shared-params');
   }
 
-  start() {
-  }
+  start() { }
 
   enter(client) {
     super.enter(client);
@@ -21,7 +20,6 @@ export default class ControllerExperience extends soundworks.BasicSharedControll
 
   exit(client) {
     super.exit(client);
-    // ...
   }
 
 }

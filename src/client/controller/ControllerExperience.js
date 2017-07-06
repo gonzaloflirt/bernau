@@ -2,22 +2,22 @@ import * as soundworks from 'soundworks/client';
 import score from '../shared/score'
 import util from '../shared/util';
 
-export default class ControllerExperience extends soundworks.BasicSharedController {
+export default class ControllerExperience extends soundworks.ControllerExperience {
 
-  constructor(options) {
-    super(options);
-
-    this.params = this.require('shared-params');
+  constructor(assetsDomain) {
+    super();
+    this.platform = this.require('platform', { features: ['web-audio'] });
+    this.checkin = this.require('checkin', { showDialog: false });
+    this.audioBufferManager = this.require('audio-buffer-manager', {
+      assetsDomain: assetsDomain, files: score.files() });
     this.sync = this.require('sync');
-    this.loader = this.require('loader', {
-      files: score.files(),
-    });
+    this.params = this.require('shared-params');
   }
 
   start() {
     super.start();
     this.firstCallback = true;
-    this.stateDurations = util.stateDurations(this.loader.buffers);
+    this.stateDurations = util.stateDurations(this.audioBufferManager.data);
     this.params.addParamListener('playing', (value) => this.playingChanged(value));
     this.params.addParamListener('next', () => this.nextTriggered());
     this.params.addParamListener('prev', () => this.prevTriggered());
@@ -62,4 +62,5 @@ export default class ControllerExperience extends soundworks.BasicSharedControll
     this.params.update('state',
       util.encodeState(state.playing, index, currentTime));
   }
+
 }

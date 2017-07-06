@@ -1,16 +1,16 @@
 import * as soundworks from 'soundworks/client';
 import ControllerExperience from './ControllerExperience';
-import viewTemplates from '../shared/viewTemplates';
-import viewContent from '../shared/viewContent';
+import serviceViews from '../shared/serviceViews';
 
 window.addEventListener('load', () => {
-  const { appName, clientType, socketIO, assetsDomain }  = window.soundworksConfig;
+  const config = Object.assign({ appContainer: '#container' }, window.soundworksConfig);
+  soundworks.client.init(config.clientType, config);
 
-  soundworks.client.init(clientType, { appName, socketIO });
-  soundworks.client.setViewContentDefinitions(viewContent);
-  soundworks.client.setViewTemplateDefinitions(viewTemplates);
+  soundworks.client.setServiceInstanciationHook((id, instance) => {
+    if (serviceViews.has(id))
+      instance.view = serviceViews.get(id, config);
+  });
 
-  const experience = new ControllerExperience();
-
+  const experience = new ControllerExperience(config.assetsDomain);
   soundworks.client.start();
 });
