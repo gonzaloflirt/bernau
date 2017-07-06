@@ -9,9 +9,7 @@ const viewTemplate = `
   <div class="foreground">
     <div class="section-top flex-middle"></div>
     <div class="section-center flex-center"></div>
-    <div class="section-bottom flex-middle">
-      <p class="small" id="channel">left</p>
-    </div>
+    <div class="section-bottom flex-middle"></div>
   </div>
 `;
 
@@ -132,7 +130,7 @@ export default class PlayerExperience extends soundworks.Experience {
   iterateChannelIndex() {
     this.stop();
     channelIndex = (channelIndex + 1) % 2;
-    document.getElementById('channel').innerHTML = channelIndex == 0 ? 'left' : 'right';
+    this.drawBackground();
     this.stateChanged(this.params.getValue('state'));
   }
 
@@ -146,6 +144,10 @@ export default class PlayerExperience extends soundworks.Experience {
     grd.addColorStop(1, 'green');
     ctx.fillStyle = grd;
     ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = 'white';
+    ctx.font = '30px Quicksand';
+    ctx.textAlign = 'center';
+    ctx.fillText(channelIndex == 0 ? 'left' : 'right', width / 2, height - 50);
   }
 
 }
