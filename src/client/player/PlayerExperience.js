@@ -5,7 +5,7 @@ import util from '../shared/util';
 const audioContext = soundworks.audioContext;
 
 const viewTemplate = `
-  <canvas class="background"></canvas>
+  <canvas class="background" id="background"></canvas>
   <div class="foreground">
     <div class="section-top flex-middle"></div>
     <div class="section-center flex-center"></div>
@@ -42,13 +42,7 @@ export default class PlayerExperience extends soundworks.Experience {
     });
 
     this.show().then(() => {
-      this.view.setPreRender(function(ctx, dt, canvasWidth, canvasHeight) {
-        var grd = ctx.createLinearGradient(0, 0, this.canvasWidth, this.canvasHeight);
-        grd.addColorStop(0, "purple");
-        grd.addColorStop(1, "green");
-        ctx.fillStyle = grd;
-        ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
-      });
+      this.drawBackground();
     });
 
     this.stateDurations = util.stateDurations(this.audioBufferManager.data);
@@ -62,8 +56,9 @@ export default class PlayerExperience extends soundworks.Experience {
       this.iterateChannelIndex();
     }.bind(this))
 
-    this.renderer = new soundworks.Canvas2dRenderer(100, 100);
-    this.view.addRenderer(this.renderer);
+    window.addEventListener("resize", function(){
+      this.drawBackground();
+    }.bind(this))
   }
 
   currentTime() {
@@ -139,6 +134,18 @@ export default class PlayerExperience extends soundworks.Experience {
     channelIndex = (channelIndex + 1) % 2;
     document.getElementById('channel').innerHTML = channelIndex == 0 ? 'left' : 'right';
     this.stateChanged(this.params.getValue('state'));
+  }
+
+  drawBackground() {
+    const canvas = document.getElementById('background');
+    const width = canvas.width;
+    const height = canvas.height;
+    var ctx = canvas.getContext('2d');
+    var grd = ctx.createLinearGradient(0, 0, width, height);
+    grd.addColorStop(0, 'purple');
+    grd.addColorStop(1, 'green');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, width, height);
   }
 
 }
