@@ -12,6 +12,7 @@ export default class ControllerExperience extends soundworks.ControllerExperienc
       assetsDomain: assetsDomain, files: score.files() });
     this.sync = this.require('sync');
     this.params = this.require('shared-params');
+    this.auth = this.require('auth');
   }
 
   start() {

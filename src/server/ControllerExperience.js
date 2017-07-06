@@ -10,6 +10,7 @@ export default class ControllerExperience extends Experience {
     this.audioBufferManager = this.require('audio-buffer-manager');
     this.sync = this.require('sync');
     this.params = this.require('shared-params');
+    this.auth = this.require('auth');
   }
 
   start() { }
