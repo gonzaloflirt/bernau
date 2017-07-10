@@ -14,7 +14,8 @@ const viewTemplate = `
 `;
 
 const model = { title: `B E R N A U` };
-var channelIndex = 0;
+const maxNumChannels = 9;
+var channelIndex = Math.floor((Math.random() * maxNumChannels)) % maxNumChannels;
 var nodes = [];
 
 export default class PlayerExperience extends soundworks.Experience {
@@ -46,12 +47,12 @@ export default class PlayerExperience extends soundworks.Experience {
     this.stateDurations = util.stateDurations(this.audioBufferManager.data);
     this.params.addParamListener('state', (value) => this.stateChanged(value));
 
-    document.documentElement.addEventListener("touchend", function(){
-      this.iterateChannelIndex();
+    document.documentElement.addEventListener("touchend", function(event){
+      this.userEvent(event);
     }.bind(this))
 
-    document.documentElement.addEventListener("click", function(){
-      this.iterateChannelIndex();
+    document.documentElement.addEventListener("click", function(event){
+      this.userEvent(event);
     }.bind(this))
 
     window.addEventListener("resize", function(){
@@ -127,9 +128,15 @@ export default class PlayerExperience extends soundworks.Experience {
     }
   }
 
-  iterateChannelIndex() {
+  userEvent(event)
+  {
+    const channels = event.pageX > window.innerWidth / 2 ? 1 : maxNumChannels - 1;
+    this.iterateChannelIndex(channels);
+  }
+
+  iterateChannelIndex(channels) {
     this.stop();
-    channelIndex = (channelIndex + 1) % 2;
+    channelIndex = (channelIndex + channels) % maxNumChannels;
     this.drawBackground();
     this.stateChanged(this.params.getValue('state'));
   }
@@ -147,7 +154,8 @@ export default class PlayerExperience extends soundworks.Experience {
     ctx.fillStyle = 'white';
     ctx.font = '30px Quicksand';
     ctx.textAlign = 'center';
-    ctx.fillText(channelIndex == 0 ? 'left' : 'right', width / 2, height - 50);
+    ctx.fillText('Tap left / right to select your group', width / 2, height / 2);
+    ctx.fillText('group ' + (channelIndex + 1), width / 2, height - 50);
   }
 
 }
