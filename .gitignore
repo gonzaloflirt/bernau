@@ -18,4 +18,5 @@
 # ignore junk files
 npm-debug.log
 .DS_Store
+*.swp
 Thumbs.db
