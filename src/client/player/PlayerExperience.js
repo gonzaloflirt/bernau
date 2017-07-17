@@ -1,6 +1,7 @@
 import * as soundworks from 'soundworks/client';
 import score from '../shared/score';
 import util from '../shared/util';
+import NoSleep from 'nosleep.js';
 
 const audioContext = soundworks.audioContext;
 
@@ -17,6 +18,7 @@ const model = { title: `B E R N A U` };
 const maxNumChannels = 9;
 var channelIndex = Math.floor((Math.random() * maxNumChannels)) % maxNumChannels;
 var nodes = [];
+var noSleep = new NoSleep();
 
 export default class PlayerExperience extends soundworks.Experience {
 
@@ -41,23 +43,35 @@ export default class PlayerExperience extends soundworks.Experience {
     });
 
     this.show().then(() => {
-      this.drawBackground();
+      this.drawInitScreen();
     });
 
     this.stateDurations = util.stateDurations(this.audioBufferManager.data);
+
+    this.touchendListener = this.exchangeTouchendListener.bind(this);
+    document.documentElement.addEventListener('touchend', this.touchendListener);
+
+    this.clickListener = this.exchangeClickListener.bind(this);
+    document.documentElement.addEventListener('click', this.clickListener);
+
+    window.addEventListener('resize', function(){ this.drawScreen(); }.bind(this))
+  }
+
+  exchangeTouchendListener() {
+    document.documentElement.removeEventListener('touchend', this.touchendListener );
     this.params.addParamListener('state', (value) => this.stateChanged(value));
+    this.drawScreen();
+    noSleep.enable();
+    document.documentElement.addEventListener('touchend',
+      function(event){ this.userEvent(event); }.bind(this));
+  }
 
-    document.documentElement.addEventListener("touchend", function(event){
-      this.userEvent(event);
-    }.bind(this))
-
-    document.documentElement.addEventListener("click", function(event){
-      this.userEvent(event);
-    }.bind(this))
-
-    window.addEventListener("resize", function(){
-      this.drawBackground();
-    }.bind(this))
+  exchangeClickListener() {
+    document.documentElement.removeEventListener('click', this.clickListener );
+    this.params.addParamListener('state', (value) => this.stateChanged(value));
+    this.drawScreen();
+    document.documentElement.addEventListener('click',
+      function(event){ this.userEvent(event); }.bind(this));
   }
 
   currentTime() {
@@ -137,11 +151,11 @@ export default class PlayerExperience extends soundworks.Experience {
   iterateChannelIndex(channels) {
     this.stop();
     channelIndex = (channelIndex + channels) % maxNumChannels;
-    this.drawBackground();
+    this.drawScreen();
     this.stateChanged(this.params.getValue('state'));
   }
 
-  drawBackground() {
+  drawBackground(midText, bottomText) {
     const canvas = document.getElementById('background');
     const width = canvas.width;
     const height = canvas.height;
@@ -154,8 +168,16 @@ export default class PlayerExperience extends soundworks.Experience {
     ctx.fillStyle = 'white';
     ctx.font = '30px Quicksand';
     ctx.textAlign = 'center';
-    ctx.fillText('Tap left / right to select your group', width / 2, height / 2);
-    ctx.fillText('group ' + (channelIndex + 1), width / 2, height - 50);
+    ctx.fillText(midText, width / 2, height / 2);
+    ctx.fillText(bottomText, width / 2, height - 50);
+  }
+
+  drawInitScreen() {
+    this.drawBackground('Tap screen', '');
+  }
+
+  drawScreen() {
+    this.drawBackground('Tap left / right to select your group', 'group ' + (channelIndex + 1));
   }
 
 }
