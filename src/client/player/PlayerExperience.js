@@ -15,8 +15,7 @@ const viewTemplate = `
 `;
 
 const model = { title: `B E R N A U` };
-const maxNumChannels = 9;
-var channelIndex = Math.floor((Math.random() * maxNumChannels)) % maxNumChannels;
+var channelIndex = Math.floor((Math.random() * score.numGroups())) % score.numGroups();
 var nodes = [];
 var noSleep = new NoSleep();
 

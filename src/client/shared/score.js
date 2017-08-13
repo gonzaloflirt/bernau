@@ -15,6 +15,10 @@ score.length = function() {
   return data.length;
 }
 
+score.numGroups = function() {
+  return Math.max.apply(null, data.map(function(val) { return val[1]; }));
+}
+
 score.names = function() {
   return data.map(function(val) { return val[0]; });
 }
