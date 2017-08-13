@@ -9,7 +9,7 @@ export default class ControllerExperience extends soundworks.ControllerExperienc
     this.platform = this.require('platform', { features: ['web-audio'] });
     this.checkin = this.require('checkin', { showDialog: false });
     this.audioBufferManager = this.require('audio-buffer-manager', {
-      assetsDomain: assetsDomain, files: score.files() });
+      assetsDomain: assetsDomain, files: score.files(0) });
     this.sync = this.require('sync');
     this.params = this.require('shared-params');
     this.auth = this.require('auth');

@@ -4,7 +4,7 @@ function stateDurations(buffers) {
   var durations = [];
   for (const i in score.names())
   {
-    durations.push(buffers[score.index(i, 0)].duration);
+    durations.push(buffers[i].duration);
   }
   return durations;
 }

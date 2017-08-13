@@ -56,7 +56,7 @@ export default class PlayerExperience extends soundworks.Experience {
     document.documentElement.removeEventListener('click', this.listener );
     this.drawScreen();
     noSleep.enable();
-    this.audioBufferManager.loadFiles(score.files()).then(()=> {
+    this.audioBufferManager.loadFiles(score.files(channelIndex)).then(()=> {
       this.stateDurations = util.stateDurations(this.audioBufferManager.data);
       this.params.addParamListener('state', (value) => this.stateChanged(value));
     });
@@ -81,8 +81,7 @@ export default class PlayerExperience extends soundworks.Experience {
   }
 
   startScene(index, time) {
-    var bufferIndex = score.index(index, channelIndex);
-    var buffer = this.audioBufferManager.data[bufferIndex];
+    var buffer = this.audioBufferManager.data[index];
 
     var currentTime = this.currentTime();
 
