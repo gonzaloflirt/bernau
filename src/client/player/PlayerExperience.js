@@ -8,14 +8,13 @@ const audioContext = soundworks.audioContext;
 const viewTemplate = `
   <canvas class="background" id="background"></canvas>
   <div class="foreground">
-    <div class="section-top flex-middle"></div>
-    <div class="section-center flex-center"></div>
+    <div class="section-top flex-middle" id="top"></div>
+    <div class="section-center flex-center" id="center"></div>
     <div class="section-bottom flex-middle"></div>
   </div>
 `;
 
 const model = { title: `B E R N A U` };
-var channelIndex = Math.floor((Math.random() * score.numGroups())) % score.numGroups();
 var nodes = [];
 var noSleep = new NoSleep();
 
@@ -41,12 +40,9 @@ export default class PlayerExperience extends soundworks.Experience {
     });
 
     this.show().then(() => {
-      this.drawInitScreen();
+      this.drawBackground();
+      this.drawGroupSelectScreen();
     });
-
-    this.listener = this.run.bind(this);
-    document.documentElement.addEventListener('touchend', this.listener);
-    document.documentElement.addEventListener('click', this.listener);
 
     window.addEventListener('resize', function(){ this.drawScreen(); }.bind(this))
   }
@@ -54,9 +50,11 @@ export default class PlayerExperience extends soundworks.Experience {
   run() {
     document.documentElement.removeEventListener('touchend', this.listener );
     document.documentElement.removeEventListener('click', this.listener );
-    this.drawScreen();
+    this.drawBackground('Loading sound files...');
+    this.removeGroupSelectScreen();
     noSleep.enable();
-    this.audioBufferManager.loadFiles(score.files(channelIndex)).then(()=> {
+    this.audioBufferManager.loadFiles(score.files(this.group)).then(()=> {
+      this.drawScreen();
       this.stateDurations = util.stateDurations(this.audioBufferManager.data);
       this.params.addParamListener('state', (value) => this.stateChanged(value));
     });
@@ -129,7 +127,7 @@ export default class PlayerExperience extends soundworks.Experience {
     }
   }
 
-  drawBackground(midText, bottomText) {
+  drawBackground(text = '') {
     const canvas = document.getElementById('background');
     const width = canvas.width;
     const height = canvas.height;
@@ -140,17 +138,58 @@ export default class PlayerExperience extends soundworks.Experience {
     ctx.fillStyle = grd;
     ctx.fillRect(0, 0, width, height);
     ctx.fillStyle = 'white';
-    ctx.font = '30px Quicksand';
+    ctx.font = '18px Quicksand';
     ctx.textAlign = 'center';
-    ctx.fillText(midText, width / 2, height / 2);
-  }
-
-  drawInitScreen() {
-    this.drawBackground('Tap screen');
+    ctx.fillText(text, width / 2, height / 2);
   }
 
   drawScreen() {
-    this.drawBackground('group ' + (channelIndex + 1));
+    if (this.group == null)
+    {
+      this.drawBackground('');
+    }
+    else
+    {
+      this.drawBackground('group ' + (this.group + 1));
+    }
+  }
+
+  drawGroupSelectScreen() {
+    var top = document.getElementById('top');
+    var txt = document.createElement('div');
+    txt.innerHTML += 'Please select a group';
+    txt.id = 'groupText';
+    top.appendChild(txt);
+
+    var table = document.createElement('table');
+    table.id = 'groupTable';
+
+    for (var i = 0; i < score.numGroups(); ++i) {
+      var row = table.insertRow(i);
+      var btn = document.createElement('button');
+      btn.innerHTML = ' group ' + (i + 1) + ' ';
+      btn.style.backgroundColor = 'transparent';
+      btn.style.color = 'white';
+      btn.style.border = '1px solid white';
+      btn.style.margin = '2px 2px 2px 2px';
+      btn.style.height = '20px';
+      btn.style.width = '100px';
+      const group = i;
+      btn.addEventListener('click', function() {
+        this.group = group;
+        this.run();
+      }.bind(this));
+      row.appendChild(btn);
+    }
+    document.getElementById('center').appendChild(table);
+  }
+
+  removeGroupSelectScreen() {
+    var txt = document.getElementById('groupText');
+    groupText.parentElement.removeChild(txt);
+
+    var table = document.getElementById('groupTable');
+    groupTable.parentElement.removeChild(table);
   }
 
 }
