@@ -27,8 +27,7 @@ export default class PlayerExperience extends soundworks.Experience {
 
     this.platform = this.require('platform', { features: ['web-audio'] });
     this.checkin = this.require('checkin', { showDialog: false });
-    this.audioBufferManager = this.require('audio-buffer-manager', {
-      assetsDomain: assetsDomain, files: score.files() });
+    this.audioBufferManager = this.require('audio-buffer-manager');
     this.sync = this.require('sync');
     this.params = this.require('shared-params');
     this.scheduler = this.require('sync-scheduler');
@@ -46,8 +45,6 @@ export default class PlayerExperience extends soundworks.Experience {
       this.drawInitScreen();
     });
 
-    this.stateDurations = util.stateDurations(this.audioBufferManager.data);
-
     this.listener = this.run.bind(this);
     document.documentElement.addEventListener('touchend', this.listener);
     document.documentElement.addEventListener('click', this.listener);
@@ -58,9 +55,12 @@ export default class PlayerExperience extends soundworks.Experience {
   run() {
     document.documentElement.removeEventListener('touchend', this.listener );
     document.documentElement.removeEventListener('click', this.listener );
-    this.params.addParamListener('state', (value) => this.stateChanged(value));
     this.drawScreen();
     noSleep.enable();
+    this.audioBufferManager.loadFiles(score.files()).then(()=> {
+      this.stateDurations = util.stateDurations(this.audioBufferManager.data);
+      this.params.addParamListener('state', (value) => this.stateChanged(value));
+    });
   }
 
   currentTime() {
