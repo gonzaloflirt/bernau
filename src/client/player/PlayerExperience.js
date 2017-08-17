@@ -15,7 +15,7 @@ const viewTemplate = `
 `;
 
 const model = { title: `B E R N A U` };
-var nodes = [];
+var nodes = {};
 var noSleep = new NoSleep();
 
 export default class PlayerExperience extends soundworks.Experience {
@@ -85,30 +85,28 @@ export default class PlayerExperience extends soundworks.Experience {
       position -= buffer.duration;
     }
 
-    nodes[index] = {
+    nodes = {
       gain: audioContext.createGain(),
       bufferSource: audioContext.createBufferSource()
     };
-    nodes[index].gain.gain.value = 1e-35;
-    nodes[index].bufferSource.buffer = buffer;
-    nodes[index].bufferSource.connect(nodes[index].gain);
-    nodes[index].gain.connect(audioContext.destination);
-    nodes[index].bufferSource.loop = true;
-    nodes[index].bufferSource.start(this.sync.getAudioTime(startTime), position);
-    nodes[index].gain.gain.exponentialRampToValueAtTime(1, audioContext.currentTime + 0.2);
+    nodes.gain.gain.value = 1e-35;
+    nodes.bufferSource.buffer = buffer;
+    nodes.bufferSource.connect(nodes.gain);
+    nodes.gain.connect(audioContext.destination);
+    nodes.bufferSource.loop = true;
+    nodes.bufferSource.start(this.sync.getAudioTime(startTime), position);
+    nodes.gain.gain.exponentialRampToValueAtTime(1, audioContext.currentTime + 0.2);
   }
 
   stop() {
     this.scheduler.clear();
     const time = audioContext.currentTime + 0.2;
-    for (const i in nodes) {
-      try {
-        nodes[i].gain.gain.exponentialRampToValueAtTime(1e-35, time);
-        nodes[i].bufferSource.stop(time);
-        nodes[i].gain.stop(time);
-      }
-      catch(err) {}
+    try {
+      nodes.gain.gain.exponentialRampToValueAtTime(1e-35, time);
+      nodes.bufferSource.stop(time);
+      nodes.gain.stop(time);
     }
+    catch(err) {}
   }
 
   drawBackground(text = '') {
