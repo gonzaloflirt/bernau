@@ -7,7 +7,6 @@ export default class ControllerExperience extends Experience {
 
     this.checkin = this.require('checkin');
     this.sharedConfig = this.require('shared-config');
-    this.audioBufferManager = this.require('audio-buffer-manager');
     this.sync = this.require('sync');
     this.params = this.require('shared-params');
     this.auth = this.require('auth');

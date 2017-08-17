@@ -55,7 +55,6 @@ export default class PlayerExperience extends soundworks.Experience {
     noSleep.enable();
     this.audioBufferManager.loadFiles(score.files(this.group)).then(()=> {
       this.drawScreen();
-      this.stateDurations = util.stateDurations(this.audioBufferManager.data);
       this.params.addParamListener('state', (value) => this.stateChanged(value));
     });
   }
@@ -69,13 +68,8 @@ export default class PlayerExperience extends soundworks.Experience {
     this.stop();
     if (state.playing)
     {
-      this.startPlayback(state.index, state.time);
+      this.startScene(state.index, state.time);
     }
-  }
-
-  startPlayback(index, time) {
-    var current = util.currentIndex(this.currentTime(), index, time, this.stateDurations);
-    this.startScene(current.index, current.time);
   }
 
   startScene(index, time) {
@@ -83,16 +77,12 @@ export default class PlayerExperience extends soundworks.Experience {
 
     var currentTime = this.currentTime();
 
-    var startTime = time;
-    var position = 0;
+    var startTime = time > currentTime ? time : currentTime;
+    var position = time > currentTime ? 0 : currentTime - time;
 
-    if (currentTime > time) {
-      startTime = currentTime;
-      position = startTime - time;
-    }
-
-    if (position > buffer.duration) {
-      return;
+    while (position > buffer.duration)
+    {
+      position -= buffer.duration;
     }
 
     nodes[index] = {
@@ -103,15 +93,9 @@ export default class PlayerExperience extends soundworks.Experience {
     nodes[index].bufferSource.buffer = buffer;
     nodes[index].bufferSource.connect(nodes[index].gain);
     nodes[index].gain.connect(audioContext.destination);
+    nodes[index].bufferSource.loop = true;
     nodes[index].bufferSource.start(this.sync.getAudioTime(startTime), position);
     nodes[index].gain.gain.exponentialRampToValueAtTime(1, audioContext.currentTime + 0.2);
-
-    const nextIndex = util.increaseStateIndex(index);
-    const nextTime = startTime + buffer.duration - position;
-
-    this.scheduler.defer(
-      function() { this.startScene(nextIndex, nextTime) }.bind(this, nextIndex, nextTime),
-      nextTime - 0.2);
   }
 
   stop() {
