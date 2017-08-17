@@ -1,7 +1,7 @@
 {
   "name": "bernau",
   "license": "BSD-3-Clause",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "scripts": {
     "minify": "node ./bin/runner --minify",
